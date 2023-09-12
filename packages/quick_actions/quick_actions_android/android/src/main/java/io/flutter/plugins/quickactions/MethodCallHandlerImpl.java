@@ -30,6 +30,8 @@ import java.util.concurrent.TimeUnit;
 class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
   protected static final String EXTRA_ACTION = "some unique action key";
 
+  private ShortcutIntentBuilder shortcutIntentBuilder = null;
+
   private final Context context;
   private Activity activity;
 
@@ -158,8 +160,11 @@ class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
   }
 
   private Intent getIntentToOpenMainActivity(String type) {
+    if (shortcutIntentBuilder != null) {
+      return shortcutIntentBuilder.buildIntent(type)
+        .putExtra(EXTRA_ACTION, type);
+    }
     final String packageName = context.getPackageName();
-
     return context
         .getPackageManager()
         .getLaunchIntentForPackage(packageName)
@@ -167,6 +172,10 @@ class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         .putExtra(EXTRA_ACTION, type)
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+  }
+
+  public void setupIntentBuilder(ShortcutIntentBuilder builder) {
+    shortcutIntentBuilder = builder;
   }
 
   static class UiThreadExecutor implements Executor {
@@ -178,3 +187,4 @@ class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     }
   }
 }
+

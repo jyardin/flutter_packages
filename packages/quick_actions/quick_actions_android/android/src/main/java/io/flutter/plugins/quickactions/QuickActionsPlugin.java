@@ -22,6 +22,7 @@ import io.flutter.plugin.common.PluginRegistry.NewIntentListener;
 /** QuickActionsPlugin */
 public class QuickActionsPlugin implements FlutterPlugin, ActivityAware, NewIntentListener {
   private static final String CHANNEL_ID = "plugins.flutter.io/quick_actions_android";
+  private static ShortcutIntentBuilder shortcutIntentBuilder;
 
   private MethodChannel channel;
   private MethodCallHandlerImpl handler;
@@ -54,6 +55,10 @@ public class QuickActionsPlugin implements FlutterPlugin, ActivityAware, NewInte
       @NonNull io.flutter.plugin.common.PluginRegistry.Registrar registrar) {
     final QuickActionsPlugin plugin = new QuickActionsPlugin();
     plugin.setupChannel(registrar.messenger(), registrar.context(), registrar.activity());
+  }
+
+  public static void setupShortcutIntentBuilder(ShortcutIntentBuilder builder) {
+    shortcutIntentBuilder = builder;
   }
 
   @Override
@@ -111,6 +116,7 @@ public class QuickActionsPlugin implements FlutterPlugin, ActivityAware, NewInte
   private void setupChannel(BinaryMessenger messenger, Context context, Activity activity) {
     channel = new MethodChannel(messenger, CHANNEL_ID);
     handler = new MethodCallHandlerImpl(context, activity);
+    handler.setupIntentBuilder(shortcutIntentBuilder);
     channel.setMethodCallHandler(handler);
   }
 
